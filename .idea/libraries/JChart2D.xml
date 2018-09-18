@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="JChart2D">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../../JChart2D" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/../../JChart2D" recursive="false" />
+  </library>
+</component>
