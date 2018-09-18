@@ -1,9 +1,21 @@
 import java.util.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class Main {
     public static void main(String args[]){
-        Chart test = new Chart();
-        test.init();
+        ExecutorService plz = Executors.newCachedThreadPool();
+        Buffer serverToGUI = new TempBuffer();
+
+        plz.execute(new Server(serverToGUI));
+        plz.execute(new Chart(serverToGUI));
+
+
+
+
+
 
        // Stack<Double> test = new Stack<Double>();
 /*

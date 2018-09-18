@@ -18,11 +18,17 @@ import java.util.*;
 
 import javax.swing.JFrame;
 
-public class Chart {
+public class Chart implements Runnable {
     //creates chart
+    Server connection;
+    private Buffer tempBuffer;
 
+    public Chart(Buffer tempBuffer){
+        this.tempBuffer = tempBuffer;
+    }
 
-    public Chart(){
+    public void run(){
+        init();
     }
 
     public void init() {
@@ -39,7 +45,7 @@ public class Chart {
         yAxis.setPaintGrid(true);
 
 
-/*
+
         xAxis.setRangePolicy(new IRangePolicy() {
             @Override
             public void addPropertyChangeListener(String s, PropertyChangeListener propertyChangeListener) {
@@ -48,7 +54,7 @@ public class Chart {
 
             @Override
             public double getMax(double v, double v1) {
-                return 5;
+                return 300;
             }
 
             @Override
@@ -124,10 +130,10 @@ public class Chart {
 
             }
         });
-*/
+
 
         //creates the trace and sets the limit on the amount of values
-        ITrace2D trace = new Trace2DLtdReplacing(20);
+        ITrace2D trace = new Trace2DLtdReplacing(300);
         trace.setColor(Color.RED);
         //this must be called before points are set
         chart.addTrace(trace);
@@ -155,25 +161,33 @@ public class Chart {
             @Override
             public void run(){
 
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e){
 
-                Scanner reader = new Scanner(System.in);
-                System.out.println("Enter Temp: ");
+                }
 
-                double y = reader.nextDouble();
+
+//                Random t = new Random();
+//                double y = t.nextDouble()*10;
+                 double y = -200;
+                  try {
+                       y = tempBuffer.blockingGet();
+                  }catch (InterruptedException e){
+                      System.out.println(e);
+                  }
+//                double y = connection.getNewTemp();
+
                 temps.add(0,y);
 
-                if(temps.size()>9){
-                    temps.remove(9);
+                if(temps.size()>299){
+                    temps.remove(299);
                 }
 
                 trace.removeAllPoints();
                 for(int i=0; i<temps.size(); i++) {
                     trace.addPoint(i, temps.get(i));
                 }
-
-
-
-
 
             }
         };
