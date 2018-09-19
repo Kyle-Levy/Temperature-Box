@@ -10,12 +10,15 @@ import info.monitorenter.gui.chart.traces.Trace2DLtdReplacing;
 import info.monitorenter.gui.chart.views.ChartPanel;
 import info.monitorenter.util.Range;
 
+import java.awt.*;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeListener;
 import java.util.*;
+import java.util.Timer;
 
+import javax.swing.*;
 import javax.swing.JFrame;
 
 public class Chart implements Runnable {
@@ -23,18 +26,63 @@ public class Chart implements Runnable {
     Server connection;
     private Buffer tempBuffer;
 
+    private final JFrame frame;
+    private final JButton pushButton;
+    private final JLabel maxFieldLabel;
+    private final JTextField maxField;
+    private final JLabel minFeldLabel;
+    private final JTextField minField;
+    private final JLabel textMessageFieldLabel;
+    private final JTextField textMessageField;
+
+
     public Chart(Buffer tempBuffer){
         this.tempBuffer = tempBuffer;
+        frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(1000,1000);
+        frame.setLayout(new BorderLayout(10,0));
+
+
+        pushButton = new JButton("push my papa");
+        maxFieldLabel = new JLabel("Max Val:");
+        maxField = new JTextField(5);
+        minFeldLabel = new JLabel("Min Val:");
+        minField = new JTextField(5);
+        textMessageFieldLabel = new JLabel("Phone Number");
+        textMessageField = new JTextField(11);
     }
 
     public void run(){
+
+        userInputInit();
         init();
+
+        frame.setVisible(true);
+    }
+
+    public void userInputInit(){
+        JPanel userInputPanel = new JPanel(new FlowLayout());
+        userInputPanel.add(pushButton);
+        userInputPanel.add(maxFieldLabel);
+        userInputPanel.add(maxField);
+        userInputPanel.add(minFeldLabel);
+        userInputPanel.add(minField);
+        userInputPanel.add(textMessageFieldLabel);
+        userInputPanel.add(textMessageField);
+
+        frame.add(userInputPanel, BorderLayout.EAST);
+
     }
 
     public void init() {
         Chart2D chart = new Chart2D();
 
+        JPanel graphingPanel = new JPanel(new BorderLayout(FlowLayout.LEFT,10));
+
+
         chart.enablePointHighlighting(true);
+
         IAxis xAxis = chart.getAxisX();
         IAxis yAxis = chart.getAxisY();
 
@@ -139,9 +187,11 @@ public class Chart implements Runnable {
         //this must be called before points are set
         chart.addTrace(trace);
 
+        /*  IMPORTANT
         JFrame frame = new JFrame("Test Chart");
         frame.getContentPane().add(chart);
         frame.setSize(1000,1000);
+
 
         frame.addWindowListener(
                 new WindowAdapter() {
@@ -153,6 +203,9 @@ public class Chart implements Runnable {
         );
 
         frame.setVisible(true);
+        */
+
+
 
         ArrayList<Double> temps = new ArrayList<>();
 
@@ -194,7 +247,11 @@ public class Chart implements Runnable {
         };
        timer.schedule(task,100,1);
 
+        graphingPanel.setBackground(Color.RED);
+        graphingPanel.setSize(1000,1000);
+        graphingPanel.add(chart);
 
+        frame.add(graphingPanel);
 
 
     }

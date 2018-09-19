@@ -36,6 +36,7 @@ public class Server implements Runnable {
                 try{
                     waitForClient();
                     getClientsStream();
+                    sendData();
                     processConnection();
                 }
                 catch (IOException serverStreamProblem) //comes from
@@ -62,8 +63,8 @@ public class Server implements Runnable {
 
 
     public void getClientsStream() throws IOException{
-        //  output = new ObjectOutputStream(connection.getOutputStream());
-        // output.flush();
+        output = new ObjectOutputStream(connection.getOutputStream());
+        output.flush();
 
         System.out.println("Server: Got friends stream");
     }
@@ -103,6 +104,18 @@ public class Server implements Runnable {
 
     public void waitingForTemp(){
         temp = -200;
+    }
+
+    public void sendData(){
+        try{
+            output.writeObject(1);
+            output.flush(); //sends necessary information to deserialize the object sent in the ObjectOutputStream
+
+        }
+        catch (IOException ioException){
+            System.out.println("Error writing object");
+        }
+
     }
 
 
