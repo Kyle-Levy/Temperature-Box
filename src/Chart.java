@@ -38,7 +38,6 @@ public class Chart implements Runnable {
         IAxis xAxis = chart.getAxisX();
         IAxis yAxis = chart.getAxisY();
 
-
         xAxis.setTitle("Time (S)");
         yAxis.setTitle("Temperature (C)");
         xAxis.setPaintGrid(true);
@@ -54,12 +53,12 @@ public class Chart implements Runnable {
 
             @Override
             public double getMax(double v, double v1) {
-                return 300;
+                return 0;
             }
 
             @Override
             public double getMin(double v, double v1) {
-                return 0;
+                return -300;
             }
 
             @Override
@@ -132,7 +131,9 @@ public class Chart implements Runnable {
         });
 
 
+
         //creates the trace and sets the limit on the amount of values
+        ITrace2D xAxisLine = new Trace2DLtd(2);
         ITrace2D trace = new Trace2DLtdReplacing(300);
         trace.setColor(Color.RED);
         //this must be called before points are set
@@ -186,7 +187,7 @@ public class Chart implements Runnable {
 
                 trace.removeAllPoints();
                 for(int i=0; i<temps.size(); i++) {
-                    trace.addPoint(i, temps.get(i));
+                    trace.addPoint(-1*i, temps.get(i));
                 }
 
             }
