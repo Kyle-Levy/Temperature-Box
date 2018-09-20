@@ -12,6 +12,8 @@ import info.monitorenter.util.Range;
 
 import java.awt.*;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeListener;
@@ -25,32 +27,70 @@ public class Chart implements Runnable {
     //creates chart
     Server connection;
     private Buffer tempBuffer;
+    private boolean buttonPushCheck;
 
     private final JFrame frame;
-    private final JButton pushButton;
+    private final JCheckBox pushButton;
     private final JLabel maxFieldLabel;
     private final JTextField maxField;
     private final JLabel minFeldLabel;
     private final JTextField minField;
     private final JLabel textMessageFieldLabel;
     private final JTextField textMessageField;
+    private final JLabel currentTemp;
+
+    private Buffer pushBuffer;
 
 
-    public Chart(Buffer tempBuffer){
+    public Chart(Buffer tempBuffer, Buffer pushBuffer){
         this.tempBuffer = tempBuffer;
+        this.pushBuffer = pushBuffer;
+
+        buttonPushCheck = false;
+
         frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1000,1000);
         frame.setLayout(new BorderLayout(10,0));
 
 
-        pushButton = new JButton("push my papa");
+        pushButton = new JCheckBox("push my papa");
+        pushButton.setFont(new Font("Serif", Font.PLAIN, 21));
+        pushButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(buttonPushCheck){
+                    buttonPushCheck = false;
+                }
+                else{
+                    buttonPushCheck = true;
+                }
+            }
+        });
+
+
         maxFieldLabel = new JLabel("Max Val:");
+        maxFieldLabel.setFont(new Font("Serif", Font.PLAIN, 21));
+
         maxField = new JTextField(5);
+        maxField.setFont(new Font("Serif", Font.PLAIN, 21));
+
         minFeldLabel = new JLabel("Min Val:");
+        minFeldLabel.setFont(new Font("Serif", Font.PLAIN, 21));
+
         minField = new JTextField(5);
+        minField.setFont(new Font("Serif", Font.PLAIN, 21));
+
         textMessageFieldLabel = new JLabel("Phone Number");
+        textMessageFieldLabel.setFont(new Font("Serif", Font.PLAIN, 21));
+
         textMessageField = new JTextField(11);
+        textMessageField.setFont(new Font("Serif", Font.PLAIN, 21));
+
+        currentTemp = new JLabel("Current Temperature: ");
+        currentTemp.setFont(new Font("Serif", Font.PLAIN, 21));
+
+
     }
 
     public void run(){
@@ -62,14 +102,29 @@ public class Chart implements Runnable {
     }
 
     public void userInputInit(){
-        JPanel userInputPanel = new JPanel(new FlowLayout());
+
+
+
+
+
+        JPanel userInputPanel = new JPanel();
+        JPanel maxFieldPanel = new JPanel();
+        JPanel minFieldPanel = new JPanel();
+        JPanel textMessagePanel = new JPanel();
+
+        maxFieldPanel.add(maxField);
+        minFieldPanel.add(minField);
+        textMessagePanel.add(textMessageField);
+
+        userInputPanel.setLayout(new BoxLayout(userInputPanel, BoxLayout.PAGE_AXIS));
         userInputPanel.add(pushButton);
         userInputPanel.add(maxFieldLabel);
-        userInputPanel.add(maxField);
+        userInputPanel.add(maxFieldPanel);
         userInputPanel.add(minFeldLabel);
-        userInputPanel.add(minField);
+        userInputPanel.add(minFieldPanel);
         userInputPanel.add(textMessageFieldLabel);
-        userInputPanel.add(textMessageField);
+        userInputPanel.add(textMessagePanel);
+        userInputPanel.add(currentTemp);
 
         frame.add(userInputPanel, BorderLayout.EAST);
 
@@ -217,6 +272,12 @@ public class Chart implements Runnable {
 
                 try {
                     Thread.sleep(1000);
+                    if(buttonPushCheck) {
+                        pushBuffer.blockingPut(44);
+                    }
+                    else{
+                        pushBuffer.blockingPut(1000);
+                    }
                 } catch (InterruptedException e){
 
                 }
@@ -227,6 +288,7 @@ public class Chart implements Runnable {
                  double y = -200;
                   try {
                        y = tempBuffer.blockingGet();
+                       currentTemp.setText("Current Temperature: "+y);
                   }catch (InterruptedException e){
                       System.out.println(e);
                   }
@@ -245,7 +307,7 @@ public class Chart implements Runnable {
 
             }
         };
-       timer.schedule(task,100,1);
+       timer.schedule(task,1,1);
 
         graphingPanel.setBackground(Color.RED);
         graphingPanel.setSize(1000,1000);

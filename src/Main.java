@@ -8,9 +8,10 @@ public class Main {
     public static void main(String args[]){
         ExecutorService plz = Executors.newCachedThreadPool();
         Buffer serverToGUI = new TempBuffer();
+        Buffer pushBuffer = new TempBuffer();
 
-        plz.execute(new Server(serverToGUI));
-        plz.execute(new Chart(serverToGUI));
+        plz.execute(new Server(serverToGUI, pushBuffer));
+        plz.execute(new Chart(serverToGUI, pushBuffer));
 
 
 

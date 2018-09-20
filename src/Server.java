@@ -9,18 +9,20 @@ public class Server implements Runnable {
     /**Defines the socket Object which is used to pass and receive the client and servers IP and port numbers  **/
     private Socket connection;
     /**Stream used to send data to the client **/
-    private ObjectOutputStream output;
+    private DataOutputStream output;
     /**Stream used to recieve data from the client**/
     private ObjectInputStream input;
 
     private Buffer tempBuffer;
+    private Buffer pushBuffer;
 
 
     private double temp;
 
-    public Server(Buffer tempBuffer){
+    public Server(Buffer tempBuffer, Buffer pushBuffer){
         temp = -200;
         this.tempBuffer = tempBuffer;
+        this.pushBuffer = pushBuffer;
 
     }
 
@@ -36,7 +38,6 @@ public class Server implements Runnable {
                 try{
                     waitForClient();
                     getClientsStream();
-                    sendData();
                     processConnection();
                 }
                 catch (IOException serverStreamProblem) //comes from
@@ -63,11 +64,12 @@ public class Server implements Runnable {
 
 
     public void getClientsStream() throws IOException{
-        output = new ObjectOutputStream(connection.getOutputStream());
-        output.flush();
+        output = new DataOutputStream(connection.getOutputStream());
+       // output.flush();
 
         System.out.println("Server: Got friends stream");
     }
+
 
 
     public void processConnection () throws IOException{
@@ -77,20 +79,38 @@ public class Server implements Runnable {
         // sendData(recievedMessage);
         do {
             try {
+                try{
+
+                    Double x = pushBuffer.blockingGet();
+                    System.out.println("her");
+                    if(x==44){
+                        sendData();
+                        System.out.println("out");
+                    } else {
+                        sendDontData();
+                        System.out.println("ut3");
+                    }
+                    System.out.println("out2");
+
+                }catch (InterruptedException e){
+                    System.out.println(e);
+                }
+
                 test = "";
                 BufferedReader inFromClient = new BufferedReader(new InputStreamReader (connection.getInputStream()));
                 // recievedMessage = (String) input.readObject();
                 test = inFromClient.readLine();
                 System.out.println("current temp: "+test);
-                temp = Double.parseDouble(test);
+
+                if(test != null){
+                    temp = Double.parseDouble(test);
+                }
                 try {
                     tempBuffer.blockingPut(temp);
                 }catch(InterruptedException e){
                     System.out.println(e);
                 }
-
             }
-
             //   catch(ClassNotFoundException e){ System.out.println("Client input object not found: "+e.getCause()); }
             // catch(IOException f){ System.out.println("Problem with clients input/output stream: "+f.getMessage()); closeConnection();}
             catch(EOFException f){ System.out.println("problem: "+f.getMessage()+" "+f.getCause()+" "+f.getLocalizedMessage()); closeConnection();}
@@ -108,14 +128,34 @@ public class Server implements Runnable {
 
     public void sendData(){
         try{
-            output.writeObject(1);
-            output.flush(); //sends necessary information to deserialize the object sent in the ObjectOutputStream
+            //  output.write(1);
+
+            output.writeUTF("1");
+            //  output.flush(); //sends necessary information to deserialize the object sent in the ObjectOutputStream
 
         }
         catch (IOException ioException){
             System.out.println("Error writing object");
         }
 
+        System.out.println("Sent");
+
+    }
+    public void sendDontData(){
+        try{
+            //  output.write(1);
+
+            output.writeUTF("0");
+            //  output.flush(); //sends necessary information to deserialize the object sent in the ObjectOutputStream
+
+        }
+        catch (IOException ioException){
+            System.out.println("Error writing object");
+        }
+
+        System.out.println("Sent");
+
+    
     }
 
 
@@ -124,8 +164,8 @@ public class Server implements Runnable {
         System.out.println("Server: Ending connection");
 
         try{
-            //   output.close();
-            //   input.close();
+           // output.close();
+            //input.close();
             connection.close();
         }
         catch (IOException closeConnectionProblem){
