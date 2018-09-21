@@ -7,8 +7,8 @@ public class TextMessage {
     private static String USER_NAME = "temptest22345@gmail.com";  // GMail user name (just the part before "@gmail.com")
     private static String PASSWORD = "TempTest123!"; // GMail password
     private static String RECIPIENT;
-    String subject = "Java send mail example";
-    String body = "Welcome to JavaMail!";
+    String subject = "TEMP EXCEEDED";
+    String body = "TEMP EXCEEDED";
 
 
 

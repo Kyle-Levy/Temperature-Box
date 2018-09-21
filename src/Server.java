@@ -36,7 +36,7 @@ public class Server implements Runnable {
 
     public void startServer(){
         try{
-            server = new ServerSocket(4444,100);
+            server = new ServerSocket(4444,4000);
 
             while(true){
                 try{
@@ -109,6 +109,7 @@ public class Server implements Runnable {
                 }
 
                 test = "";
+                System.out.println("hi");
                 BufferedReader inFromClient = new BufferedReader(new InputStreamReader (connection.getInputStream()));
 
                 // recievedMessage = (String) input.readObject();

@@ -12,4 +12,6 @@ public interface Buffer {
 
     public String blockingStringGets() throws InterruptedException;
 
+    public int getSize();
+
 }

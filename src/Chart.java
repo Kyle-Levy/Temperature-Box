@@ -377,14 +377,32 @@ public class Chart implements Runnable {
                               off = true;
                               y=-200;
                           }
-                          else if(yy.equals("E")){
+                           if(yy.equals("E")){
                               //when levy sends 300 points
                               firstConnect = true;
-                              for(int k=0; k<300;k++){
-                                  temps.clear();
-                                  temps.add(0,tempBuffer.blockingGet());
+                              temps.clear();
+                               if(buttonPushCheck) {
+                                   pushBuffer.blockingPut(44);
+                               }
+                               else{
+                                   pushBuffer.blockingPut(1000);
+                               }
+                              yy = tempBuffer.blockingStringGet();
+                              String[] threeHunah = yy.split("-");
+                              int k =0;
+                              for(String a:threeHunah){
+                                  if(!a.equals("D")){
+                                      temps.add(k, Double.parseDouble(a));
+                                  }
+                                  else{
+                                      temps.add(k, -200.0);
+                                  }
+
                               }
-                          }
+
+
+
+                           }
                           else if(yy.equals("F")){
                               //on restart
                               trace.removeAllPoints();
