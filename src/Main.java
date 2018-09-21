@@ -11,10 +11,11 @@ public class Main {
         ExecutorService plz = Executors.newCachedThreadPool();
         Buffer serverToGUI = new TempBuffer();
         Buffer pushBuffer = new TempBuffer();
+        Buffer onBuffer = new TempBuffer();
 
 
-        plz.execute(new Server(serverToGUI, pushBuffer));
-        plz.execute(new Chart(serverToGUI, pushBuffer));
+        plz.execute(new Server(serverToGUI, pushBuffer, onBuffer));
+        plz.execute(new Chart(serverToGUI, pushBuffer, onBuffer));
 
 
         /*

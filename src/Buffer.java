@@ -8,4 +8,8 @@ public interface Buffer {
 
     public String blockingStringGet() throws InterruptedException;
 
+    public void blockingStringPuts(String giveStringTemp) throws InterruptedException;
+
+    public String blockingStringGets() throws InterruptedException;
+
 }

@@ -41,6 +41,7 @@ public class Chart implements Runnable {
     private final JComboBox providerBox;
 
     private Buffer pushBuffer;
+    private Buffer onBuffer;
 
     private double minTemp;
     private double maxTemp;
@@ -52,7 +53,7 @@ public class Chart implements Runnable {
     public boolean off;
     public boolean firstConnect;
 
-    public Chart(Buffer tempBuffer, Buffer pushBuffer){
+    public Chart(Buffer tempBuffer, Buffer pushBuffer, Buffer onBuffer){
         textSentMax = false;
         textSentMin = false;
         off = false;
@@ -69,6 +70,7 @@ public class Chart implements Runnable {
 
         this.tempBuffer = tempBuffer;
         this.pushBuffer = pushBuffer;
+        this.onBuffer = onBuffer;
 
         buttonPushCheck = false;
 
@@ -336,6 +338,19 @@ public class Chart implements Runnable {
             @Override
             public void run(){
 
+
+                try{
+                    String onoff = onBuffer.blockingStringGets();
+
+                    if(onoff.equals("0")){
+                        currentTemp.setText("Current Temperature: NOT CONNECTED");
+                    }
+
+                } catch (InterruptedException e){
+                    System.out.println(e);
+                }
+
+
                 try {
                     Thread.sleep(1000);
                     if(buttonPushCheck) {
@@ -363,11 +378,18 @@ public class Chart implements Runnable {
                               y=-200;
                           }
                           else if(yy.equals("E")){
+                              //when levy sends 300 points
                               firstConnect = true;
                               for(int k=0; k<300;k++){
                                   temps.clear();
                                   temps.add(0,tempBuffer.blockingGet());
                               }
+                          }
+                          else if(yy.equals("F")){
+                              //on restart
+                              trace.removeAllPoints();
+                              temps.clear();
+                              firstConnect = true;
                           }
                           else{
                               trace.setVisible(true);
@@ -399,7 +421,7 @@ public class Chart implements Runnable {
 
 
                         if(y==-200) {
-                            currentTemp.setText("Current Temperature: THERMOMETER NOT CONNECTED");
+                            currentTemp.setText("Current Temperature: NOT CONNECTED");
                         }else{
                             currentTemp.setText("Current Temperature: " + y+"\u00b0"+"C");
                         }
@@ -411,7 +433,7 @@ public class Chart implements Runnable {
                 if(firstConnect != true) {
                     temps.add(0, y);
                 }else{
-                      firstConnect = true;
+                      firstConnect = false;
                 }
 
                 if(temps.size()>299){

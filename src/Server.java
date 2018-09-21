@@ -15,16 +15,18 @@ public class Server implements Runnable {
 
     private Buffer tempBuffer;
     private Buffer pushBuffer;
+    private Buffer onBuffer;
 
 
 
 
     private double temp;
 
-    public Server(Buffer tempBuffer, Buffer pushBuffer){
+    public Server(Buffer tempBuffer, Buffer pushBuffer, Buffer onBuffer){
         temp = -200;
         this.tempBuffer = tempBuffer;
         this.pushBuffer = pushBuffer;
+        this.onBuffer = onBuffer;
 
     }
 
@@ -60,8 +62,18 @@ public class Server implements Runnable {
 
     public void waitForClient() throws IOException{
         System.out.println("Server: Waiting for friend :(");
+        try {
+            onBuffer.blockingStringPuts("0");
+        }catch(InterruptedException e){
+            System.out.println(e);
+        }
         connection = server.accept();
-       // connection.setSoTimeout(2000);
+        connection.setSoTimeout(5000);
+        try {
+            onBuffer.blockingStringPuts("1");
+        }catch(InterruptedException e){
+            System.out.println(e);
+        }
         System.out.println("Server: Found friend :) named: "+connection.getInetAddress().getHostName());
     }
 
@@ -84,6 +96,7 @@ public class Server implements Runnable {
             try {
                 try{
 
+                    onBuffer.blockingStringPuts("1");
                     Double x = pushBuffer.blockingGet();
                     if(x==44){
                         sendData();
@@ -167,10 +180,18 @@ public class Server implements Runnable {
 
     public void closeConnection(){
         System.out.println("Server: Ending connection");
+        try {
+            onBuffer.blockingStringPuts("0");
+            tempBuffer.blockingStringPut("F");
+        } catch(InterruptedException e){
+
+        }
 
         try{
            // output.close();
             //input.close();
+
+
             connection.close();
         }
         catch (IOException closeConnectionProblem){

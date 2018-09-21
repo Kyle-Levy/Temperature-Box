@@ -4,11 +4,13 @@ public class TempBuffer implements Buffer {
 
     private final ArrayBlockingQueue<Double> buffer;
     private final ArrayBlockingQueue<String> sbuffer;
+    private final ArrayBlockingQueue<String> ssbuffer;
 
 
     public TempBuffer(){
         buffer = new ArrayBlockingQueue<Double>(300);
         sbuffer = new ArrayBlockingQueue<String>(300);
+        ssbuffer = new ArrayBlockingQueue<String>(300);
     }
 
     @Override
@@ -29,6 +31,17 @@ public class TempBuffer implements Buffer {
 
     @Override
     public String blockingStringGet() throws InterruptedException {
+        String returnTemps = sbuffer.take();
+        return returnTemps;
+    }
+
+    @Override
+    public void blockingStringPuts(String giveStringTemp) throws InterruptedException {
+        sbuffer.put(giveStringTemp);
+    }
+
+    @Override
+    public String blockingStringGets() throws InterruptedException {
         String returnTemps = sbuffer.take();
         return returnTemps;
     }
