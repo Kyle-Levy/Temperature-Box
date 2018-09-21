@@ -17,6 +17,8 @@ public class Server implements Runnable {
     private Buffer pushBuffer;
 
 
+
+
     private double temp;
 
     public Server(Buffer tempBuffer, Buffer pushBuffer){
@@ -59,6 +61,7 @@ public class Server implements Runnable {
     public void waitForClient() throws IOException{
         System.out.println("Server: Waiting for friend :(");
         connection = server.accept();
+       // connection.setSoTimeout(2000);
         System.out.println("Server: Found friend :) named: "+connection.getInetAddress().getHostName());
     }
 
@@ -82,7 +85,6 @@ public class Server implements Runnable {
                 try{
 
                     Double x = pushBuffer.blockingGet();
-                    System.out.println("her");
                     if(x==44){
                         sendData();
                         System.out.println("out");
@@ -98,10 +100,17 @@ public class Server implements Runnable {
 
                 test = "";
                 BufferedReader inFromClient = new BufferedReader(new InputStreamReader (connection.getInputStream()));
+
                 // recievedMessage = (String) input.readObject();
                 test = inFromClient.readLine();
                 System.out.println("current temp: "+test);
 
+                try{
+                    tempBuffer.blockingStringPut(test);
+                } catch (InterruptedException e){
+                    System.out.println(e);
+                }
+                /* IMPORTANT
                 if(test != null){
                     temp = Double.parseDouble(test);
                 }
@@ -110,6 +119,7 @@ public class Server implements Runnable {
                 }catch(InterruptedException e){
                     System.out.println(e);
                 }
+                */
             }
             //   catch(ClassNotFoundException e){ System.out.println("Client input object not found: "+e.getCause()); }
             // catch(IOException f){ System.out.println("Problem with clients input/output stream: "+f.getMessage()); closeConnection();}
@@ -155,7 +165,7 @@ public class Server implements Runnable {
 
         System.out.println("Sent");
 
-    
+
     }
 
 

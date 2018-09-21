@@ -6,13 +6,22 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 public class Main {
     public static void main(String args[]){
+
+
         ExecutorService plz = Executors.newCachedThreadPool();
         Buffer serverToGUI = new TempBuffer();
         Buffer pushBuffer = new TempBuffer();
 
+
         plz.execute(new Server(serverToGUI, pushBuffer));
         plz.execute(new Chart(serverToGUI, pushBuffer));
 
+
+        /*
+        TextMessage t = new TextMessage();
+        t.setRECIPIENT("8473800792",1);
+        t.sendMail();
+        */
 
 
 

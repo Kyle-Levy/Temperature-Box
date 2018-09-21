@@ -38,11 +38,35 @@ public class Chart implements Runnable {
     private final JLabel textMessageFieldLabel;
     private final JTextField textMessageField;
     private final JLabel currentTemp;
+    private final JComboBox providerBox;
 
     private Buffer pushBuffer;
 
+    private double minTemp;
+    private double maxTemp;
+    private String phoneNumber;
+    private int provider;
+    private TextMessage textMessage;
+    private boolean textSentMax;
+    private boolean textSentMin;
+    public boolean off;
+
 
     public Chart(Buffer tempBuffer, Buffer pushBuffer){
+        textSentMax = false;
+        textSentMin = false;
+        off = false;
+
+        textMessage = new TextMessage();
+        phoneNumber = "8473800792";
+        provider = 1;
+
+        minTemp = 0;
+        maxTemp = 40;
+
+        this.textMessage = new TextMessage();
+
+
         this.tempBuffer = tempBuffer;
         this.pushBuffer = pushBuffer;
 
@@ -73,19 +97,59 @@ public class Chart implements Runnable {
         maxFieldLabel.setFont(new Font("Serif", Font.PLAIN, 21));
 
         maxField = new JTextField(5);
+        maxField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                maxTemp = Double.parseDouble((e.getActionCommand()));
+                textSentMax = false;
+            }
+        });
         maxField.setFont(new Font("Serif", Font.PLAIN, 21));
 
         minFeldLabel = new JLabel("Min Val:");
         minFeldLabel.setFont(new Font("Serif", Font.PLAIN, 21));
 
         minField = new JTextField(5);
+        minField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                minTemp = Double.parseDouble((e.getActionCommand()));
+                textSentMin = false;
+            }
+        });
+
         minField.setFont(new Font("Serif", Font.PLAIN, 21));
 
         textMessageFieldLabel = new JLabel("Phone Number");
         textMessageFieldLabel.setFont(new Font("Serif", Font.PLAIN, 21));
 
         textMessageField = new JTextField(11);
+        textMessageField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                phoneNumber = e.getActionCommand();
+            }
+        });
         textMessageField.setFont(new Font("Serif", Font.PLAIN, 21));
+
+        String[] options = {"AT&T","T-Mobile","Verizon","Sprint"};
+        providerBox = new JComboBox(options);
+        providerBox.setSelectedIndex(3);
+        providerBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int s = providerBox.getSelectedIndex();
+                if(s==0){
+                    provider = 1;
+                }else if(s==1){
+                    provider = 2;
+                }else if(s==2){
+                    provider=3;
+                }else if(s==3){
+                    provider=4;
+                }
+            }
+        });
 
         currentTemp = new JLabel("Current Temperature: ");
         currentTemp.setFont(new Font("Serif", Font.PLAIN, 21));
@@ -115,6 +179,7 @@ public class Chart implements Runnable {
         maxFieldPanel.add(maxField);
         minFieldPanel.add(minField);
         textMessagePanel.add(textMessageField);
+        textMessagePanel.add(providerBox);
 
         userInputPanel.setLayout(new BoxLayout(userInputPanel, BoxLayout.PAGE_AXIS));
         userInputPanel.add(pushButton);
@@ -161,7 +226,7 @@ public class Chart implements Runnable {
 
             @Override
             public double getMin(double v, double v1) {
-                return -300;
+                return -50;
             }
 
             @Override
@@ -199,7 +264,7 @@ public class Chart implements Runnable {
 
             @Override
             public double getMax(double v, double v1) {
-                return 70;
+                return 50;
             }
 
             @Override
@@ -264,6 +329,7 @@ public class Chart implements Runnable {
 
         ArrayList<Double> temps = new ArrayList<>();
 
+
         Timer timer = new Timer(true);
         TimerTask task = new TimerTask(){
 
@@ -287,12 +353,56 @@ public class Chart implements Runnable {
 //                double y = t.nextDouble()*10;
                  double y = -200;
                   try {
-                       y = tempBuffer.blockingGet();
-                       currentTemp.setText("Current Temperature: "+y);
+                       //y = tempBuffer.blockingGet();
+                      String yy;
+                      yy = tempBuffer.blockingStringGet();
+                      System.out.println("hi: "+yy);
+                      if(yy!=null){
+                          System.out.println("check");
+                          if(yy.equals("D")){
+                              System.out.println("break graph");
+                              off = true;
+                              y=-200;
+                          }
+                          else{
+                              trace.setVisible(true);
+                              y = Double.parseDouble(yy);
+
+                              if(y < minTemp && !textSentMin){
+                                  textMessage.setRECIPIENT(phoneNumber, provider);
+                                  textMessage.sendMail();
+                                  textSentMin = true;
+
+                              }
+                              if(textSentMin && y>minTemp+5){
+                                  textSentMin = false;
+                              }
+                              if(y > maxTemp && !textSentMax){
+                                  textMessage.setRECIPIENT(phoneNumber, provider);
+                                  textMessage.sendMail();
+                                  textSentMax = true;
+
+                              }
+                              if(textSentMin && y<maxTemp-5){
+                                  textSentMax = false;
+                              }
+
+
+                          }
+
+                      }
+
+
+                        if(y==-200) {
+                            currentTemp.setText("Current Temperature: NOT CONNECTED");
+                        }else{
+                            currentTemp.setText("Current Temperature: " + y);
+                        }
                   }catch (InterruptedException e){
                       System.out.println(e);
                   }
 //                double y = connection.getNewTemp();
+
 
                 temps.add(0,y);
 
@@ -302,6 +412,11 @@ public class Chart implements Runnable {
 
                 trace.removeAllPoints();
                 for(int i=0; i<temps.size(); i++) {
+                    if(off==true && i==0){
+                        trace.addPoint(-1*i,-200);
+                        off = false;
+                    }
+
                     trace.addPoint(-1*i, temps.get(i));
                 }
 
