@@ -50,7 +50,7 @@ public class Chart implements Runnable {
     private boolean textSentMax;
     private boolean textSentMin;
     public boolean off;
-
+    public boolean firstConnect;
 
     public Chart(Buffer tempBuffer, Buffer pushBuffer){
         textSentMax = false;
@@ -78,7 +78,7 @@ public class Chart implements Runnable {
         frame.setLayout(new BorderLayout(10,0));
 
 
-        pushButton = new JCheckBox("push my papa");
+        pushButton = new JCheckBox("ENABLE LED");
         pushButton.setFont(new Font("Serif", Font.PLAIN, 21));
         pushButton.addActionListener(new ActionListener() {
             @Override
@@ -151,7 +151,7 @@ public class Chart implements Runnable {
             }
         });
 
-        currentTemp = new JLabel("Current Temperature: ");
+        currentTemp = new JLabel("Current Temperature: NOT CONNECTED");
         currentTemp.setFont(new Font("Serif", Font.PLAIN, 21));
 
 
@@ -206,7 +206,7 @@ public class Chart implements Runnable {
         IAxis xAxis = chart.getAxisX();
         IAxis yAxis = chart.getAxisY();
 
-        xAxis.setTitle("Time (S)");
+        xAxis.setTitle("Seconds Ago (S)");
         yAxis.setTitle("Temperature (C)");
         xAxis.setPaintGrid(true);
         yAxis.setPaintGrid(true);
@@ -226,7 +226,7 @@ public class Chart implements Runnable {
 
             @Override
             public double getMin(double v, double v1) {
-                return -50;
+                return -300;
             }
 
             @Override
@@ -356,13 +356,18 @@ public class Chart implements Runnable {
                        //y = tempBuffer.blockingGet();
                       String yy;
                       yy = tempBuffer.blockingStringGet();
-                      System.out.println("hi: "+yy);
+
                       if(yy!=null){
-                          System.out.println("check");
                           if(yy.equals("D")){
-                              System.out.println("break graph");
                               off = true;
                               y=-200;
+                          }
+                          else if(yy.equals("E")){
+                              firstConnect = true;
+                              for(int k=0; k<300;k++){
+                                  temps.clear();
+                                  temps.add(0,tempBuffer.blockingGet());
+                              }
                           }
                           else{
                               trace.setVisible(true);
@@ -394,17 +399,20 @@ public class Chart implements Runnable {
 
 
                         if(y==-200) {
-                            currentTemp.setText("Current Temperature: NOT CONNECTED");
+                            currentTemp.setText("Current Temperature: THERMOMETER NOT CONNECTED");
                         }else{
-                            currentTemp.setText("Current Temperature: " + y);
+                            currentTemp.setText("Current Temperature: " + y+"\u00b0"+"C");
                         }
                   }catch (InterruptedException e){
                       System.out.println(e);
                   }
 //                double y = connection.getNewTemp();
 
-
-                temps.add(0,y);
+                if(firstConnect != true) {
+                    temps.add(0, y);
+                }else{
+                      firstConnect = true;
+                }
 
                 if(temps.size()>299){
                     temps.remove(299);

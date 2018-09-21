@@ -87,12 +87,9 @@ public class Server implements Runnable {
                     Double x = pushBuffer.blockingGet();
                     if(x==44){
                         sendData();
-                        System.out.println("out");
                     } else {
                         sendDontData();
-                        System.out.println("ut3");
                     }
-                    System.out.println("out2");
 
                 }catch (InterruptedException e){
                     System.out.println(e);
@@ -148,7 +145,6 @@ public class Server implements Runnable {
             System.out.println("Error writing object");
         }
 
-        System.out.println("Sent");
 
     }
     public void sendDontData(){
@@ -163,7 +159,6 @@ public class Server implements Runnable {
             System.out.println("Error writing object");
         }
 
-        System.out.println("Sent");
 
 
     }
